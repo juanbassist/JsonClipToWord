@@ -2,13 +2,16 @@
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Diagnostics;
 
 namespace JsonClipToWord
 {
+    [DebuggerDisplay("{nombre}|{valorString}|S:{EsString}|O:{TieneObjeto}|N:{NivelAnidamiento}")]
     public class PropiedadJson
     {
         JProperty _jProperty;
         JValue _jValue;
+        public int NivelAnidamiento { get; set; }
         public string nombre { get; }
         public bool TieneValor { get; }
         public bool TieneArray { get; }
@@ -46,9 +49,10 @@ namespace JsonClipToWord
             }
         }
 
-        public PropiedadJson(JProperty jProperty)
+        public PropiedadJson(JProperty jProperty, int nivelAnidamiento = 0)
         {
             _jProperty = jProperty;
+            NivelAnidamiento = nivelAnidamiento;
             nombre = jProperty.Name;
 
             TieneValor = jProperty.Value is JValue;
@@ -94,7 +98,7 @@ namespace JsonClipToWord
 
         IEnumerable<PropiedadJson> MapListPropiedadJsonFromJObject(JObject jobject)
         {
-            var propiedadesJson = jobject.Children().Select(c => new PropiedadJson(c as JProperty));
+            var propiedadesJson = jobject.Children().Select(c => new PropiedadJson(c as JProperty, NivelAnidamiento+1));
             return propiedadesJson;
         }
     }

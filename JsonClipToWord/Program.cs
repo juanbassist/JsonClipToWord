@@ -5,19 +5,17 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Windows.Forms;
 
 namespace JsonClipToWord
 {
     class Program
     {
+        [STAThread]
         static void Main(string[] args)
         {
-            var clipboardText = @"{
-                                'estatus': {
-                                    'prop4': 'value4',
-                                    'prop5': 'value5'
-                                }
-                              }"; ;
+            string clipboardText = ObtenerJsonDeClipboard();
+
             XWPFDocument doc = new XWPFDocument();
             IEnumerable<RenglonEspecificacion> renglonesEspecificacion = ObtenerRenglonesEspecificacionFromJsonText(clipboardText);
 
@@ -38,23 +36,46 @@ namespace JsonClipToWord
             {
                 doc.Write(fs);
             }
+            //Console.ReadLine();
+        }
+
+        private static string ObtenerJsonDeClipboard()
+        {
+            string clipboardText = default;
+            try
+            {
+                if (!Clipboard.ContainsText(TextDataFormat.Text))
+                    throw new Exception("Clipboard no tiene texto valido");
+
+                clipboardText = Clipboard.GetText(TextDataFormat.Text);
+                Console.WriteLine(clipboardText);
+                JToken.Parse(clipboardText);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"JSOn no valido de clipboard.Ex: {ex.Message}. Presione Cualquier Tecla para salir.");
+                Console.ReadLine();
+                Environment.Exit(1);
+            }
+
+            return clipboardText;
         }
 
         private static IEnumerable<RenglonEspecificacion> ObtenerRenglonesEspecificacionFromJsonText(string fromJsonTxt)
         {
             var modeloJson = new ModeloJson(fromJsonTxt);
 
-            IList<RenglonEspecificacion> renglonesEspecificacion = new List<RenglonEspecificacion>();
+            List<RenglonEspecificacion> renglonesEspecificacion = new List<RenglonEspecificacion>();
 
             foreach (var item in modeloJson.propiedadesJson)
-                renglonesEspecificacion = ObtenerRenglonesEspecificacionFromPropiedadJson(item);
+                renglonesEspecificacion.AddRange(ObtenerRenglonesEspecificacionFromPropiedadJson(item));
            
             return renglonesEspecificacion;
         }
         private static IList<RenglonEspecificacion>ObtenerRenglonesEspecificacionFromPropiedadJson(PropiedadJson propiedadJson)
         {
             var listaRenglones = new List<RenglonEspecificacion>();
-            listaRenglones.Add(new RenglonEspecificacion(indexRenglonGlobal++, propiedadJson.nombre, propiedadJson.GetNombreTipoDatoAbreviado));
+            listaRenglones.Add(new RenglonEspecificacion(indexRenglonGlobal++, propiedadJson.nombre, propiedadJson.GetNombreTipoDatoAbreviado, propiedadJson.NivelAnidamiento));
             
             if (propiedadJson.TieneObjeto)
             {

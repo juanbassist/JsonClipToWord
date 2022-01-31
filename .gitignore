@@ -85,3 +85,4 @@ docker-compose-deploy*.yml
 launchSettings.json
 testSettings.json
 src/log/
+.fake
