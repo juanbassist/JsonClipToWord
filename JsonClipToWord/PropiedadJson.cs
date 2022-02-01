@@ -93,12 +93,21 @@ namespace JsonClipToWord
                 valorObjeto = TieneObjeto ? MapListPropiedadJsonFromJObject(jProperty.Value as JObject).ToList() : new List<PropiedadJson>();
 
             if (TieneArray)
-                throw new ApplicationException($"Arrays no soportados. Se detecto propiedad con Valor No Mapeada con {nombre}:{valorString} como type '{jProperty.Type}'. Actualizar codigo...");
+                valorObjeto = TieneArray ? MapListPropiedadJsonFromJArray(jProperty.Value as JArray).ToList() : new List<PropiedadJson>();
         }
 
         IEnumerable<PropiedadJson> MapListPropiedadJsonFromJObject(JObject jobject)
         {
             var propiedadesJson = jobject.Children().Select(c => new PropiedadJson(c as JProperty, NivelAnidamiento+1));
+            return propiedadesJson;
+        }
+
+        /// <summary>
+        /// Solo se queda con la primer tupla del array como ejemplo.
+        /// </summary>
+        IEnumerable<PropiedadJson> MapListPropiedadJsonFromJArray(JArray jarray)
+        {
+            var propiedadesJson = jarray.First().Children().Select(c => new PropiedadJson(c as JProperty, NivelAnidamiento + 1));
             return propiedadesJson;
         }
     }

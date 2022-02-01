@@ -77,14 +77,11 @@ namespace JsonClipToWord
             var listaRenglones = new List<RenglonEspecificacion>();
             listaRenglones.Add(new RenglonEspecificacion(indexRenglonGlobal++, propiedadJson.nombre, propiedadJson.GetNombreTipoDatoAbreviado, propiedadJson.NivelAnidamiento));
             
-            if (propiedadJson.TieneObjeto)
+            if (propiedadJson.TieneObjeto || propiedadJson.TieneArray)
             {
                 foreach (var propiedadJsonNested in propiedadJson.valorObjeto)
                     listaRenglones.AddRange(ObtenerRenglonesEspecificacionFromPropiedadJson(propiedadJsonNested));
             }   
-
-            if (propiedadJson.TieneArray)
-                throw new NotImplementedException("TieneArray falta implementar en funcion recursiva.");
 
             return listaRenglones;
         }
